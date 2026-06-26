@@ -104,8 +104,6 @@ const addDoctor = async (req, res) => {
         const { name, email, password, speciality, degree, experience, about, fees, address } = req.body
         const imageFile = req.file
 
-        console.log({name, email, password, speciality, degree, experience, about, fees, address },imageFile)
-
         // checking for all data to add doctor
         if (!name || !email || !password || !speciality || !degree || !experience || !about || !fees || !address) {
             return res.json({ success: false, message: "Missing Details" })
@@ -140,7 +138,7 @@ const addDoctor = async (req, res) => {
 
         // Upload image to Cloudinary
         const imageUpload = await cloudinary.uploader.upload(imageFile.path);
-        console.log("Upload Success:", imageUpload);
+        // console.log("Upload Success:", imageUpload);
 
 
         const imageUrl = imageUpload.secure_url

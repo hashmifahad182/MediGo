@@ -54,15 +54,6 @@ const appointmentCancel = async (req, res) => {
         const {appointmentId } = req.body
         const docId = req.docId;
 
-        // if (DEMO_MODE) {
-        //     return res.json({
-        //         success: true,
-        //         demo: true,
-        //         message:
-        //             "Demo Mode: Appointment cancellation simulated successfully."
-        //     });
-        // }
-
         const appointmentData = await appointmentModel.findById(appointmentId)
         if (appointmentData && appointmentData.docId === docId) {
             await appointmentModel.findByIdAndUpdate(appointmentId, { cancelled: true })
@@ -84,15 +75,6 @@ const appointmentComplete = async (req, res) => {
 
         const { appointmentId } = req.body
         const docId = req.docId;
-
-        // if (DEMO_MODE) {
-        //     return res.json({
-        //         success: true,
-        //         demo: true,
-        //         message:
-        //             "Demo Mode: Appointment completion simulated successfully."
-        //     });
-        // }
 
         const appointmentData = await appointmentModel.findById(appointmentId)
         if (appointmentData && appointmentData.docId === docId) {
@@ -129,15 +111,6 @@ const changeAvailablity = async (req, res) => {
 
         const docId = req.docId;
 
-        // if (DEMO_MODE) {
-        //     return res.json({
-        //         success: true,
-        //         demo: true,
-        //         message:
-        //             "Demo Mode: Availability update simulated successfully. Changes are not saved."
-        //     });
-        // }
-
         const docData = await doctorModel.findById(docId)
         await doctorModel.findByIdAndUpdate(docId, { available: !docData.available })
         res.json({ success: true, message: 'Availablity Changed' })
@@ -169,15 +142,6 @@ const updateDoctorProfile = async (req, res) => {
 
         const { fees, address, available } = req.body
         const docId = req.docId;
-
-        // if (DEMO_MODE) {
-        //     return res.json({
-        //         success: true,
-        //         demo: true,
-        //         message:
-        //             "Demo Mode: Profile update simulated successfully. Changes are not saved."
-        //     });
-        // }
 
         await doctorModel.findByIdAndUpdate(docId, { fees, address, available })
 
