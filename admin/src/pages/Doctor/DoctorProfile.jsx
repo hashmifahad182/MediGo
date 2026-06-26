@@ -24,7 +24,11 @@ const DoctorProfile = () => {
             const { data } = await axios.post(backendUrl + '/api/doctor/update-profile', updateData, { headers: { dToken } })
 
             if (data.success) {
-                toast.success(data.message)
+                if (data.demo) {
+                    toast.info(data.message);
+                } else {
+                    toast.success(data.message);
+                }
                 setIsEdit(false)
                 getProfileData()
             } else {

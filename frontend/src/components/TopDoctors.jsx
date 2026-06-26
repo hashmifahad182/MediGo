@@ -1,7 +1,6 @@
 import React from 'react'
 import { useNavigate} from 'react-router-dom'
 import { AppContext } from '../context/AppContext'
-// import { doctors } from '../assets/assets'
 import { useContext } from 'react'
 
 const TopDoctors = () => {
@@ -11,18 +10,51 @@ const TopDoctors = () => {
     <div className='flex flex-col items-center gap-4 my-16 text-gray-900 md:mx-10'>
       <h1 className='text-3xl font-medium '>Top Doctors</h1>
       <p className='text-sm text-center sm:w-1/3'>Meet our top-rated doctors who are dedicated to providing exceptional care and expertise.</p>   
-      <div className='grid w-full grid-cols-5 gap-4 px-3 pt-5 gap-y-6 sm:px-0'>
+      <div className="grid w-full grid-cols-1 gap-6 mt-8 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
             {doctors.slice(0,10).map((doctor,index) => (
-              <div onClick={()=>navigate(`/appointment/${doctor._id}`)} key={index} className='overflow-hidden border border-blue-200 rounded-xl cursor-pointer hover:translate-y-[-10px] transition-all duration-500'>
-                <img className=' bg-blue-50' src={doctor.image} alt=""/>
-                <div className='p-4'>
-                  <div className='flex items-center gap-2 text-sm text-center text-green-500'>
-                        <p className='w-2 h-2 bg-green-500 rounded-full'></p>
-                        <p >Available</p>
-                  </div>
-                  <p className='text-lg font-medium text-gray-900'>{doctor.name}</p>
-                  <p className='text-sm text-gray-600'>{doctor.speciality}</p>
+              <div
+    onClick={() => {
+        navigate(`/appointment/${doctor._id}`)
+        window.scrollTo({ top: 0, behavior: "smooth" })
+    }}
+    key={doctor._id}
+    className="flex flex-col overflow-hidden transition-all duration-300 bg-white border border-blue-100 shadow-sm cursor-pointer rounded-2xl hover:shadow-xl hover:-translate-y-2"
+>
+                <div className="h-64 overflow-hidden bg-blue-50">
+                    <img
+                        src={doctor.image}
+                        alt={doctor.name}
+                        className="object-cover w-full h-full"
+                    />
                 </div>
+                <div className="flex flex-col flex-grow p-5">
+
+                  <div className="flex items-center gap-2 mb-3">
+                    <span
+                        className={`w-2.5 h-2.5 rounded-full ${
+                            doctor.available ? "bg-green-500" : "bg-red-500"
+                        }`}
+                    ></span>
+
+                    <span
+                        className={`text-sm font-medium ${
+                            doctor.available ? "text-green-600" : "text-red-600"
+                        }`}
+                    >
+                        {doctor.available ? "Available" : "Unavailable"}
+                    </span>
+                    
+                  </div>
+
+                  <h3 className="text-lg font-semibold text-gray-800">
+                      {doctor.name}
+                  </h3>
+
+                  <p className="mt-1 text-sm text-gray-500">
+                      {doctor.speciality}
+                  </p>
+
+              </div>
               </div>
             ))}
       </div>

@@ -2,6 +2,7 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import doctorModel from "../models/doctorModel.js";
 import appointmentModel from "../models/appointmentModel.js";
+import DEMO_MODE from "../config/demoMode.js";
 
 // API for doctor Login 
 const loginDoctor = async (req, res) => {
@@ -35,7 +36,7 @@ const loginDoctor = async (req, res) => {
 const appointmentsDoctor = async (req, res) => {
     try {
 
-        const { docId } = req.body
+        const docId = req.docId;
         const appointments = await appointmentModel.find({ docId })
 
         res.json({ success: true, appointments })
@@ -50,7 +51,17 @@ const appointmentsDoctor = async (req, res) => {
 const appointmentCancel = async (req, res) => {
     try {
 
-        const { docId, appointmentId } = req.body
+        const {appointmentId } = req.body
+        const docId = req.docId;
+
+        // if (DEMO_MODE) {
+        //     return res.json({
+        //         success: true,
+        //         demo: true,
+        //         message:
+        //             "Demo Mode: Appointment cancellation simulated successfully."
+        //     });
+        // }
 
         const appointmentData = await appointmentModel.findById(appointmentId)
         if (appointmentData && appointmentData.docId === docId) {
@@ -71,7 +82,17 @@ const appointmentCancel = async (req, res) => {
 const appointmentComplete = async (req, res) => {
     try {
 
-        const { docId, appointmentId } = req.body
+        const { appointmentId } = req.body
+        const docId = req.docId;
+
+        // if (DEMO_MODE) {
+        //     return res.json({
+        //         success: true,
+        //         demo: true,
+        //         message:
+        //             "Demo Mode: Appointment completion simulated successfully."
+        //     });
+        // }
 
         const appointmentData = await appointmentModel.findById(appointmentId)
         if (appointmentData && appointmentData.docId === docId) {
@@ -106,7 +127,16 @@ const doctorList = async (req, res) => {
 const changeAvailablity = async (req, res) => {
     try {
 
-        const { docId } = req.body
+        const docId = req.docId;
+
+        // if (DEMO_MODE) {
+        //     return res.json({
+        //         success: true,
+        //         demo: true,
+        //         message:
+        //             "Demo Mode: Availability update simulated successfully. Changes are not saved."
+        //     });
+        // }
 
         const docData = await doctorModel.findById(docId)
         await doctorModel.findByIdAndUpdate(docId, { available: !docData.available })
@@ -122,7 +152,7 @@ const changeAvailablity = async (req, res) => {
 const doctorProfile = async (req, res) => {
     try {
 
-        const { docId } = req.body
+        const docId = req.docId;
         const profileData = await doctorModel.findById(docId).select('-password')
 
         res.json({ success: true, profileData })
@@ -137,7 +167,17 @@ const doctorProfile = async (req, res) => {
 const updateDoctorProfile = async (req, res) => {
     try {
 
-        const { docId, fees, address, available } = req.body
+        const { fees, address, available } = req.body
+        const docId = req.docId;
+
+        // if (DEMO_MODE) {
+        //     return res.json({
+        //         success: true,
+        //         demo: true,
+        //         message:
+        //             "Demo Mode: Profile update simulated successfully. Changes are not saved."
+        //     });
+        // }
 
         await doctorModel.findByIdAndUpdate(docId, { fees, address, available })
 
@@ -153,7 +193,7 @@ const updateDoctorProfile = async (req, res) => {
 const doctorDashboard = async (req, res) => {
     try {
 
-        const { docId } = req.body
+        const docId = req.docId;
 
         const appointments = await appointmentModel.find({ docId })
 
@@ -172,8 +212,6 @@ const doctorDashboard = async (req, res) => {
                 patients.push(item.userId)
             }
         })
-
-
 
         const dashData = {
             earnings,

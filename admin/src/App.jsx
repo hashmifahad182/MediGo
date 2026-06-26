@@ -20,10 +20,29 @@ const App = () => {
   const { dToken } = useContext(DoctorContext)
   const { aToken } = useContext(AdminContext)
 
+  const isDemoAdmin =
+    localStorage.getItem("demoAdmin") === "true";
+
   return dToken || aToken ? (
     <div className='bg-[#F8F9FD]'>
       <ToastContainer />
       <Navbar />
+      {isDemoAdmin && (
+          <div className="px-4 py-3 border border-yellow-200 rounded-lg bg-yellow-50">
+            <div className="flex items-center gap-2">
+                <span className="text-lg">🟡</span>
+                <h3 className="font-semibold text-yellow-800">
+                    Public Demo Mode
+                </h3>
+            </div>
+
+            <p className="text-sm text-yellow-700">
+                You're exploring a public demonstration of the Admin Dashboard.
+                To preserve the demo environment, administrative changes are
+                simulated and are <span className="font-semibold">not saved</span>.
+            </p>
+        </div>
+      )}
       <div className='flex items-start'>
         <Sidebar />
         <Routes>

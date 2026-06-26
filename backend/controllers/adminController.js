@@ -5,27 +5,65 @@ import bcrypt from "bcrypt";
 import validator from "validator";
 import { v2 as cloudinary } from "cloudinary";
 import userModel from "../models/userModel.js";
-import fs from "fs";
+import DEMO_MODE from "../config/demoMode.js";
 
 // API for admin login
 const loginAdmin = async (req, res) => {
     try {
 
-        const { email, password } = req.body
+        const { email, password } = req.body;
 
-        if (email === process.env.ADMIN_EMAIL && password === process.env.ADMIN_PASSWORD) {
-            const token = jwt.sign(email + password, process.env.JWT_SECRET)
-            res.json({ success: true, token })
-        } else {
-            res.json({ success: false, message: "Invalid credentials" })
+        // Production Admin
+        if (
+            email === process.env.ADMIN_EMAIL &&
+            password === process.env.ADMIN_PASSWORD
+        ) {
+
+            const token = jwt.sign(
+                email + password,
+                process.env.JWT_SECRET
+            );
+
+            return res.json({
+                success: true,
+                token,
+                demo: false
+            });
+
         }
 
-    } catch (error) {
-        console.log(error)
-        res.json({ success: false, message: error.message })
-    }
+        // Demo Admin
+        if (
+            email === process.env.DEMO_ADMIN_EMAIL &&
+            password === process.env.DEMO_ADMIN_PASSWORD
+        ) {
 
-}
+            const token = jwt.sign(
+                email + password,
+                process.env.JWT_SECRET
+            );
+
+            return res.json({
+                success: true,
+                token,
+                demo: true
+            });
+
+        }
+
+        return res.json({
+            success: false,
+            message: "Invalid credentials"
+        });
+
+    } catch (error) {
+        console.log(error);
+        res.json({
+            success: false,
+            message: error.message
+        });
+    }
+};
 
 
 // API to get all appointments list
@@ -83,14 +121,25 @@ const addDoctor = async (req, res) => {
             return res.json({ success: false, message: "Please enter a strong password" })
         }
 
+        // Demo mode protection
+        if (
+            DEMO_MODE &&
+            req.isDemoAdmin
+        ) {
+            return res.json({
+                success: true,
+                demo: true,
+                message:
+                    "Demo Mode: Doctor details validated successfully. Changes are not saved."
+            });
+        }
+
         // hashing user password
         const salt = await bcrypt.genSalt(10); // the more no. round the more time it will take
         const hashedPassword = await bcrypt.hash(password, salt)
 
-        // upload image to cloudinary
         // Upload image to Cloudinary
         const imageUpload = await cloudinary.uploader.upload(imageFile.path);
-
         console.log("Upload Success:", imageUpload);
 
 

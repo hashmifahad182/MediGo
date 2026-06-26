@@ -6,14 +6,13 @@ import doctorModel from "../models/doctorModel.js";
 import appointmentModel from "../models/appointmentModel.js";
 import { v2 as cloudinary } from 'cloudinary'
 // import stripe from "stripe";
-// import razorpay from 'razorpay';
+import razorpay from 'razorpay';
 
-// Gateway Initialize
-// const stripeInstance = new stripe(process.env.STRIPE_SECRET_KEY)
-// const razorpayInstance = new razorpay({
-//     key_id: process.env.RAZORPAY_KEY_ID,
-//     key_secret: process.env.RAZORPAY_KEY_SECRET,
-// })
+// Gateway Initialize\
+const razorpayInstance = new razorpay({
+    key_id: process.env.RAZORPAY_KEY_ID,
+    key_secret: process.env.RAZORPAY_KEY_SECRET,
+})
 
 // API to register user
 const registerUser = async (req, res) => {
@@ -88,7 +87,7 @@ const loginUser = async (req, res) => {
 const getProfile = async (req, res) => {
 
     try {
-        const { userId } = req.body
+        const userId = req.userId;
         const userData = await userModel.findById(userId).select('-password')
 
         res.json({ success: true, userData })
@@ -103,8 +102,8 @@ const getProfile = async (req, res) => {
 const updateProfile = async (req, res) => {
 
     try {
-
-        const { userId, name, phone, address, dob, gender } = req.body
+        const userId = req.userId;
+        const { name, phone, address, dob, gender } = req.body
         const imageFile = req.file
 
         if (!name || !phone || !dob || !gender) {
@@ -135,7 +134,8 @@ const bookAppointment = async (req, res) => {
 
     try {
 
-        const { userId, docId, slotDate, slotTime } = req.body
+        const {docId, slotDate, slotTime } = req.body
+        const userId = req.userId;
         const docData = await doctorModel.findById(docId).select("-password")
 
         if (!docData.available) {
@@ -191,7 +191,8 @@ const bookAppointment = async (req, res) => {
 const cancelAppointment = async (req, res) => {
     try {
 
-        const { userId, appointmentId } = req.body
+        const { appointmentId } = req.body
+        const userId = req.userId;
         const appointmentData = await appointmentModel.findById(appointmentId)
 
         // verify appointment user 
@@ -224,7 +225,7 @@ const cancelAppointment = async (req, res) => {
 const listAppointment = async (req, res) => {
     try {
 
-        const { userId } = req.body
+        const userId = req.userId;
         const appointments = await appointmentModel.find({ userId })
 
         res.json({ success: true, appointments })
@@ -236,112 +237,54 @@ const listAppointment = async (req, res) => {
 }
 
 // API to make payment of appointment using razorpay
-// const paymentRazorpay = async (req, res) => {
-//     try {
+const paymentRazorpay = async (req, res) => {
+    try {
 
-//         const { appointmentId } = req.body
-//         const appointmentData = await appointmentModel.findById(appointmentId)
+        const { appointmentId } = req.body
+        const appointmentData = await appointmentModel.findById(appointmentId)
 
-//         if (!appointmentData || appointmentData.cancelled) {
-//             return res.json({ success: false, message: 'Appointment Cancelled or not found' })
-//         }
+        if (!appointmentData || appointmentData.cancelled) {
+            return res.json({ success: false, message: 'Appointment Cancelled or not found' })
+        }
 
-//         // creating options for razorpay payment
-//         const options = {
-//             amount: appointmentData.amount * 100,
-//             currency: process.env.CURRENCY,
-//             receipt: appointmentId,
-//         }
+        // creating options for razorpay payment
+        const options = {
+            amount: appointmentData.amount * 100,
+            currency: process.env.CURRENCY,
+            receipt: appointmentId,
+        }
 
-//         // creation of an order
-//         const order = await razorpayInstance.orders.create(options)
+        // creation of an order
+        const order = await razorpayInstance.orders.create(options)
 
-//         res.json({ success: true, order })
+        res.json({ success: true, order })
 
-//     } catch (error) {
-//         console.log(error)
-//         res.json({ success: false, message: error.message })
-//     }
-// }
+    } catch (error) {
+        console.log(error)
+        res.json({ success: false, message: error.message })
+    }
+}
 
 // // API to verify payment of razorpay
-// const verifyRazorpay = async (req, res) => {
-//     try {
-//         const { razorpay_order_id } = req.body
-//         const orderInfo = await razorpayInstance.orders.fetch(razorpay_order_id)
+const verifyRazorpay = async (req, res) => {
+    try {
+        const { razorpay_order_id } = req.body
+        const orderInfo = await razorpayInstance.orders.fetch(razorpay_order_id)
 
-//         if (orderInfo.status === 'paid') {
-//             await appointmentModel.findByIdAndUpdate(orderInfo.receipt, { payment: true })
-//             res.json({ success: true, message: "Payment Successful" })
-//         }
-//         else {
-//             res.json({ success: false, message: 'Payment Failed' })
-//         }
-//     } catch (error) {
-//         console.log(error)
-//         res.json({ success: false, message: error.message })
-//     }
-// }
+        if (orderInfo.status === 'paid') {
+            await appointmentModel.findByIdAndUpdate(orderInfo.receipt, { payment: true })
+            res.json({ success: true, message: "Payment Successful" })
+        }
+        else {
+            res.json({ success: false, message: 'Payment Failed' })
+        }
+    } catch (error) {
+        console.log(error)
+        res.json({ success: false, message: error.message })
+    }
+}
 
-// // API to make payment of appointment using Stripe
-// const paymentStripe = async (req, res) => {
-//     try {
 
-//         const { appointmentId } = req.body
-//         const { origin } = req.headers
-
-//         const appointmentData = await appointmentModel.findById(appointmentId)
-
-//         if (!appointmentData || appointmentData.cancelled) {
-//             return res.json({ success: false, message: 'Appointment Cancelled or not found' })
-//         }
-
-//         const currency = process.env.CURRENCY.toLocaleLowerCase()
-
-//         const line_items = [{
-//             price_data: {
-//                 currency,
-//                 product_data: {
-//                     name: "Appointment Fees"
-//                 },
-//                 unit_amount: appointmentData.amount * 100
-//             },
-//             quantity: 1
-//         }]
-
-//         const session = await stripeInstance.checkout.sessions.create({
-//             success_url: `${origin}/verify?success=true&appointmentId=${appointmentData._id}`,
-//             cancel_url: `${origin}/verify?success=false&appointmentId=${appointmentData._id}`,
-//             line_items: line_items,
-//             mode: 'payment',
-//         })
-
-//         res.json({ success: true, session_url: session.url });
-
-//     } catch (error) {
-//         console.log(error)
-//         res.json({ success: false, message: error.message })
-//     }
-// }
-
-// const verifyStripe = async (req, res) => {
-//     try {
-
-//         const { appointmentId, success } = req.body
-
-//         if (success === "true") {
-//             await appointmentModel.findByIdAndUpdate(appointmentId, { payment: true })
-//             return res.json({ success: true, message: 'Payment Successful' })
-//         }
-
-//         res.json({ success: false, message: 'Payment Failed' })
-
-//     } catch (error) {
-//         console.log(error)
-//         res.json({ success: false, message: error.message })
-//     }
-
-// }
 
 export {
     loginUser,
@@ -351,8 +294,6 @@ export {
     bookAppointment,
     listAppointment,
     cancelAppointment,
-    // paymentRazorpay,
-    // verifyRazorpay,
-    // paymentStripe,
-    // verifyStripe
+    paymentRazorpay,
+    verifyRazorpay,
 }
