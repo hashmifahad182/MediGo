@@ -160,7 +160,9 @@ const DemoAccess = () => {
       <div className="mt-10 text-center">
 
             <button
-                  onClick={() => window.open(import.meta.env.VITE_DASHBOARD_URL, "_blank")}
+                  onClick={() => window.open("https://fahad-medigo-dashboard.netlify.app",
+      "_blank"
+    )}
                   className="px-10 py-4 text-lg font-semibold text-white transition-all duration-300 rounded-full shadow-md bg-primary hover:shadow-xl hover:scale-105"
             >
                   Explore Dashboard →
