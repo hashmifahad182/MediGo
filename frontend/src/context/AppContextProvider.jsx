@@ -8,8 +8,6 @@ const AppContextProvider = (props ) => {
     currencySymbol
   };
 
-  
-
   return (
     <AppContext.Provider value={value}>
       {props.children}
